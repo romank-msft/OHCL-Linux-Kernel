@@ -617,7 +617,7 @@ enum hv_translate_gva_result_code {
 union hv_translate_gva_result {
 	__u64 as_uint64;
 	struct {
-		__u32 result_code; /* enum hv_translate_hva_result_code */
+		__u32 result_code; /* enum hv_translate_gva_result_code */
 		__u32 cache_type : 8;
 		__u32 overlay_page : 1;
 		__u32 reserved : 23;
@@ -746,7 +746,7 @@ union hv_synic_sirbp {
 union hv_interrupt_control {
 	__u64 as_uint64;
 	struct {
-		__u32 interrupt_type; /* enum hv_interrupt type */
+		__u32 interrupt_type; /* enum hv_interrupt_type */
 		__u32 level_triggered : 1;
 		__u32 logical_dest_mode : 1;
 		__u32 rsvd : 30;
