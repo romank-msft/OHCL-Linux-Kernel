@@ -626,6 +626,17 @@ static bool __init ms_hyperv_msi_ext_dest_id(void)
 {
 	u32 eax;
 
+	/*
+	 * The root does not advertise this leaf to higher VTLs since
+	 * there is no IO-APIC. Allow 15-bit APIC IDs anyway to support
+	 * large VMs.
+	 *
+	 * TODO: this should be a runtime check based on the current
+	 * VTL.
+	 */
+	if (IS_ENABLED(CONFIG_HYPERV_VTL_MODE))
+		return true;
+
 	eax = cpuid_eax(HYPERV_CPUID_VIRT_STACK_INTERFACE);
 	if (eax != HYPERV_VS_INTERFACE_EAX_SIGNATURE)
 		return false;
