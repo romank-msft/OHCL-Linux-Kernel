@@ -935,16 +935,6 @@ void vmbus_initiate_unload(bool crash)
 		vmbus_wait_for_unload();
 }
 
-static void check_ready_for_resume_event(void)
-{
-	/*
-	 * If all the old primary channels have been fixed up, then it's safe
-	 * to resume.
-	 */
-	if (atomic_dec_and_test(&vmbus_connection.nr_chan_fixup_on_resume))
-		complete(&vmbus_connection.ready_for_resume_event);
-}
-
 static void vmbus_setup_channel_state(struct vmbus_channel *channel,
 				      struct vmbus_channel_offer_channel *offer)
 {
@@ -1100,8 +1090,6 @@ static void vmbus_onoffer(struct vmbus_channel_message_header *hdr)
 
 		/* Add the channel back to the array of channels. */
 		vmbus_channel_map_relid(oldchannel);
-		check_ready_for_resume_event();
-
 		mutex_unlock(&vmbus_connection.channel_mutex);
 		return;
 	}
@@ -1288,12 +1276,11 @@ EXPORT_SYMBOL_GPL(vmbus_hvsock_device_unregister);
 /*
  * vmbus_onoffers_delivered -
  * This is invoked when all offers have been delivered.
- *
- * Nothing to do here.
  */
 static void vmbus_onoffers_delivered(
 			struct vmbus_channel_message_header *hdr)
 {
+	complete(&vmbus_connection.all_offers_delivered_event);
 }
 
 /*
@@ -1569,7 +1556,8 @@ void vmbus_onmessage(struct vmbus_channel_message_header *hdr)
 }
 
 /*
- * vmbus_request_offers - Send a request to get all our pending offers.
+ * vmbus_request_offers - Send a request to get all our pending offers
+ * and wait for all offers to arrive.
  */
 int vmbus_request_offers(void)
 {
@@ -1587,6 +1575,12 @@ int vmbus_request_offers(void)
 
 	msg->msgtype = CHANNELMSG_REQUESTOFFERS;
 
+	/*
+	 * This message will result in the host sending an all offers
+	 * delivered message.
+	 */
+	reinit_completion(&vmbus_connection.all_offers_delivered_event);
+
 	ret = vmbus_post_msg(msg, sizeof(struct vmbus_channel_message_header),
 			     true);
 
@@ -1597,6 +1591,22 @@ int vmbus_request_offers(void)
 
 		goto cleanup;
 	}
+
+	/* Wait for the host to send all offers. */
+	while (wait_for_completion_timeout(
+		&vmbus_connection.all_offers_delivered_event, 10 * HZ) == 0) {
+		pr_warn("waiting for all offers to be delivered...\n");
+	}
+
+	/*
+	 * Flush handling of offer messages (which may initiate work on
+	 * other work queues).
+	 */
+	flush_workqueue(vmbus_connection.work_queue);
+
+	/* Flush processing the incoming offers. */
+	flush_workqueue(vmbus_connection.handle_primary_chan_wq);
+	flush_workqueue(vmbus_connection.handle_sub_chan_wq);
 
 cleanup:
 	kfree(msginfo);
