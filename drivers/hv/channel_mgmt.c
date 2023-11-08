@@ -141,7 +141,8 @@ const struct vmbus_device vmbus_devs[] = {
 	},
 
 	/* Unknown GUID */
-	{ .dev_type = HV_UNKNOWN,
+	{ .pref_ring_size = 0x11000,
+	  .dev_type = HV_UNKNOWN,
 	  .perf_device = false,
 	  .allowed_in_isolated = false,
 	},
