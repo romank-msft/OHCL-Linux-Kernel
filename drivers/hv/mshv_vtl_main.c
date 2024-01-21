@@ -1568,7 +1568,7 @@ static struct miscdevice mshv_vtl_low = {
 	.minor = MISC_DYNAMIC_MINOR,
 };
 
-static void __init hv_mshv_init_dev_memory(u64 addr)
+static void __init mshv_vtl_init_dev_memory(u64 addr)
 {
 	pgd_t	*pgd;
 	p4d_t	*p4d;
@@ -1591,7 +1591,7 @@ static void __init hv_mshv_init_dev_memory(u64 addr)
 
 }
 
-static int __init mshv_vmbus_mod_init(void)
+static int __init mshv_vtl_init_memory(void)
 {
 	u64 addr;
 
@@ -1604,7 +1604,7 @@ static int __init mshv_vmbus_mod_init(void)
 	 */
 	BUILD_BUG_ON(IS_ENABLED(CONFIG_KASAN));
 	for (addr = 0xffffea8000000000ULL; addr < 0xfffffc0000000000ULL; addr += 0x8000000000ULL)
-		hv_mshv_init_dev_memory(addr);
+		mshv_vtl_init_dev_memory(addr);
 
 	return 0;
 }
@@ -1666,7 +1666,7 @@ static int __init mshv_vtl_init(void)
 		goto free_mem;
 	}
 
-	mshv_vmbus_mod_init();
+	mshv_vtl_init_memory();
 
 	return 0;
 
