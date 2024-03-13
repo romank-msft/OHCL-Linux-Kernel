@@ -46,13 +46,6 @@ void __init hv_vtl_init_platform(void)
 	x86_platform.legacy.devices.pnpbios = 0;
 
 	x86_init.hyper.msi_ext_dest_id = hv_vtl_msi_ext_dest_id;
-
-	/*
-	 * TODO: Investigate issues with stack corruption when attempting
-	 * parallel bring up of secondary vCPUs in VTL context. Implement
-	 * necessary support for this feature.
-	 */
-	x86_cpuinit.parallel_bringup = false;
 }
 
 static inline u64 hv_vtl_system_desc_base(struct ldttss_desc *desc)
