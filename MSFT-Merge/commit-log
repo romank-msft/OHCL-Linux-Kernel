@@ -2,6 +2,11 @@
 Commit Hash     Date                    Commit Message/[Author]
 -------------   ----------              ---------------------------------------------------------------------------------
 
+5bc29aedb621e 	2024-04-08		Fix definition of HV_EVENT_FLAGS_LONG_COUNT to always be the count of the number of 64-bit entries in HV_EVENT_FLAGS. [Allen Pais]
+4547d777b3737 	2024-04-05		sched/topology: Enable topology_span_sane check only for Debug builds [Allen Pais]
+11a1cdad5a3a0 	2024-04-0		1MSR driver compiled-in [Allen Pais]
+685cb43ebb067 	2024-03-29		mm/vmstat: Defer the refresh_zone_stat_thresholds after all CPUs bringup [Allen Pais]
+2118a04306a12 	2024-03-29		Enable building the MSR module [Allen Pais]
 4ab6923451a2 	2024-03-13 		x86/hyperv: Use per cpu initial stack for vtl context [Saurabh Sengar]
 9451cc98e46e 	2024-03-13		Revert "x86/hyperv: Disable parallel cpu bringup for VTL" [Saurabh Sengar]
 e2ad0a997440 	2024-02-29		config: Switch to 100 HZ value [Boqun Feng]
