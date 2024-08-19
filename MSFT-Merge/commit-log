@@ -2,6 +2,22 @@
 Commit Hash     Date                    Commit Message/[Author]
 -------------   ----------              ---------------------------------------------------------------------------------
 
+c1e5ff19c21dc   2024-07-29              Add script to merge kernel configurations based on architecture type [Allen Pais]
+a5db2f06e6526   2024-08-01              Drivers: hv: enable the VP assist page for the root partition [Roman Kisel]
+9424da585e2da   2024-06-24              Fix TDX build by not depending on EFI [Dexuan Cui]
+a03e96e55c7b6   2024-06-30              drivers/hv/mshv_vtl_main.c: handle DECRYPTED_MASK for CVMs [Dexuan Cui]
+314c2770ad9b4   2024-07-16              drivers/hv/mshv_vtl_main.c: Fixed the crash in mshv_vtl_switch_to_vtl0_irqoff for TDX [Dexuan Cui]
+28c74e219d684   2024-06-26              uio: CVM: Add the pgprot_decrypted for UIO_MEM_IOVA in mmap [Dexuan Cui]
+64545c870538c   2024-05-17              coco/tdx: reflect faulting va back to usermode [Dexuan Cui]
+0038447e5a22c   2024-04-04              x86/hyperv: Use Hyper-V reset page to boot tdx APs [Dexuan Cui]
+8618f8d272fc4   2024-04-04              drivers/hv: Add support for mshv_vtl on TDX [Dexuan Cui]
+92be06dec3dc2   2024-06-25              Drivers: hv: vmbus: Allow more VMBus devices for a CVM UH kernel [Dexuan Cui]
+df2530900a6e8   2024-04-09              uio_hv_generic: Fix the send_buf_size in hv_uio_probe() [Dexuan Cui]
+02a9254243a27   2024-05-20              x86/tdx: Support vmalloc() for tdx_enc_status_changed() [Dexuan Cui]
+ffa13f8c6cc0d   2023-08-10              x86/tdx: Retry partially-completed page conversion hypercalls [Dexuan Cui]
+0f277ef51def1   2024-06-20              clocksource: hyper-v: Use lapic timer in a TDX VM without paravisor
+fde0cb3573c05   2024-07-01              binfmt_elf, coredump: Log the reason for the failed core dumps [Allen Pais]
+0f4733c284d54   2024-06-05              hyperv/arm64: Use PSCI to start processors.
 72bd144abf51d 	2024-05-29		drivers/hv: Account for various page sizes on ARM64 [Roman Kisel🦇]
 9d45284e7c215 	2024-05-29		mshv_vtl: Initialize the assist page pointer [Roman Kisel🦇]
 5f6cdcd9c0abc 	2024-05-17		hcl: Update Kernel Configuration [Allen Pais]
