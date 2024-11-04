@@ -765,6 +765,16 @@ static int mshv_vtl_ioctl_set_poll_file(struct mshv_vtl_set_poll_file __user *us
 
 
 #if defined(CONFIG_X86_64) && defined(CONFIG_INTEL_TDX_GUEST)
+/* Request a cache flush via TDG.VP.VMMCALL */
+void mshv_tdx_request_cache_flush(bool wbnoinvd)
+{
+	struct tdx_hypercall_args args = {};
+
+	args.r11 = 0x36; /* WBINVD call code */
+	args.r12 = wbnoinvd ? 1 : 0; /* WBINVD/WBNOINVD indicator */
+	__tdx_hypercall(&args);
+}
+
 #define TDCALL_ASM	".byte 0x66,0x0f,0x01,0xcc"
 
 /* TODO TDX: Confirm noinline produces the right asm for saving register state */
@@ -871,6 +881,7 @@ noinline void mshv_vtl_return_tdx(void)
 	kernel_fpu_end();
 }
 #else
+void mshv_tdx_request_cache_flush(bool wbnoinvd) { }
 noinline void mshv_vtl_return_tdx(void) { }
 #endif
 
@@ -1438,7 +1449,7 @@ static long mshv_vtl_ioctl_guest_vsm_vmsa_pfn(void __user *user_arg)
 	u64 pfn;
 	u32 cpu_id;
 	long ret;
-	
+
 	ret = copy_from_user(&cpu_id, user_arg, sizeof(cpu_id)) ? -EFAULT : 0;
 	if (ret)
 		return ret;
