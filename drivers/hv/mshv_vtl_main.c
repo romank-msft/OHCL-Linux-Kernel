@@ -191,6 +191,13 @@ static struct mshv_vtl_run *mshv_vtl_cpu_run(int cpu)
 	return *per_cpu_ptr(&mshv_vtl_per_cpu.run, cpu);
 }
 
+struct sev_es_save_area *mshv_vtl_this_vmsa(void);
+
+struct sev_es_save_area *mshv_vtl_this_vmsa(void)
+{
+	return (struct sev_es_save_area *)page_address(*this_cpu_ptr(&mshv_vtl_per_cpu.vmsa_page));
+}
+
 static struct page *mshv_vtl_cpu_reg_page(int cpu)
 {
 	return *per_cpu_ptr(&mshv_vtl_per_cpu.reg_page, cpu);
@@ -1658,7 +1665,7 @@ static long mshv_vtl_ioctl_pvalidate(void __user* pval_user)
 		param.use_large_page = use_large_page;
 		param.validate = pval.validate;
 
-		rc = mshv_use_local_page(pfn, use_large_page, count, &failed_pfn, mshv_vtl_use_local_page_pvalidate, &param);
+		rc = mshv_use_local_page(pfn, use_large_page, true, count, &failed_pfn, mshv_vtl_use_local_page_pvalidate, &param);
 		if (rc == PVALIDATE_FAIL_SIZEMISMATCH && use_large_page) {
 			/*
 			 * The hypervisor indicated that it smashed the large page into 4KiB ones.
@@ -1675,7 +1682,7 @@ static long mshv_vtl_ioctl_pvalidate(void __user* pval_user)
 			param.use_large_page = false;
 
 			pr_debug("%s: retrying, large_page %d, pfn %#llx, count %#llx\n", __func__, use_large_page, pfn, count);
-			rc = mshv_use_local_page(pfn, use_large_page, count, &failed_pfn, mshv_vtl_use_local_page_pvalidate, &param);
+			rc = mshv_use_local_page(pfn, use_large_page, true, count, &failed_pfn, mshv_vtl_use_local_page_pvalidate, &param);
 		}
 
 		if (WARN(rc, "%s failed for pfn %#llx, ret %ld", __func__, failed_pfn, rc)) {
@@ -1743,7 +1750,7 @@ static long mshv_vtl_ioctl_rmpadjust(void __user *rmpa_user)
 		param.use_large_page = use_large_page;
 		param.attrs = rmpa.value;
 
-		rc = mshv_use_local_page(pfn, use_large_page, count, &failed_pfn, mshv_vtl_use_local_page_rmpadjust, &param);
+		rc = mshv_use_local_page(pfn, use_large_page, true, count, &failed_pfn, mshv_vtl_use_local_page_rmpadjust, &param);
 		if (rc == PVALIDATE_FAIL_SIZEMISMATCH && use_large_page) {
 			/*
 			 * The hypervisor indicated that it smashed the large page into 4KiB ones.
@@ -1760,7 +1767,7 @@ static long mshv_vtl_ioctl_rmpadjust(void __user *rmpa_user)
 			param.use_large_page = false;
 
 			pr_debug("%s: retrying, large_page %d, pfn %#llx, count %#llx\n", __func__, use_large_page, pfn, count);
-			rc = mshv_use_local_page(pfn, use_large_page, count, &failed_pfn, mshv_vtl_use_local_page_rmpadjust, &param);
+			rc = mshv_use_local_page(pfn, use_large_page, true, count, &failed_pfn, mshv_vtl_use_local_page_rmpadjust, &param);
 		}
 
 		if (WARN(rc, "%s failed for pfn %#llx, ret %ld", __func__, failed_pfn, rc)) {
@@ -2188,11 +2195,7 @@ static long __mshv_ioctl_create_vtl(void __user *user_arg, struct device *module
 	vtl = kzalloc(sizeof(*vtl), GFP_KERNEL);
 	if (!vtl)
 		return -ENOMEM;
-	if (hv_isolation_type_snp()) {
-		local_maps = mshv_vtl_setup_local_maps();
-		if (!local_maps)
-			return -ENOMEM;
-	}
+	local_maps = mshv_vtl_setup_local_maps();
 
 	fd = get_unused_fd_flags(O_CLOEXEC);
 	if (fd < 0) {

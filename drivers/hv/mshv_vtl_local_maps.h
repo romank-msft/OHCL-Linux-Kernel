@@ -7,7 +7,7 @@
 
 struct mshv_local_maps;
 
-#ifdef CONFIG_SEV_GUEST
+#ifdef CONFIG_X86_64
 #include <asm/pgtable_64_types.h>
 
 enum mshv_page_type {
@@ -25,7 +25,7 @@ void mshv_vtl_teardown_local_maps(struct mshv_local_maps *maps);
 void mshv_vtl_dump_local_maps(struct mshv_local_maps *maps);
 
 typedef ssize_t (*mshv_use_local_page_func)(void*, void*);
-ssize_t mshv_use_local_page(u64 pfn, bool large, u64 pfn_count, u64 *failed_pfn, mshv_use_local_page_func f, void *param);
+ssize_t mshv_use_local_page(u64 pfn, bool large, bool encrypt, u64 pfn_count, u64 *failed_pfn, mshv_use_local_page_func f, void *param);
 
 #else
 

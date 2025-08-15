@@ -344,7 +344,7 @@ static void pet_watchdogs(void)
 	touch_nmi_watchdog();
 }
 
-ssize_t mshv_use_local_page(u64 pfn, bool large, u64 pfn_count, u64 *failed_pfn,
+ssize_t mshv_use_local_page(u64 pfn, bool large, bool encrypt, u64 pfn_count, u64 *failed_pfn,
 		mshv_use_local_page_func f, void *param)
 {
 	u32 cpu;
@@ -391,7 +391,9 @@ ssize_t mshv_use_local_page(u64 pfn, bool large, u64 pfn_count, u64 *failed_pfn,
 		 * `_PAGE_ENC` automatically changes to `0` when no confidential
 		 * pages are supported.
 		 */
-		page_flags = _PAGE_PRESENT | _PAGE_ACCESSED | _PAGE_DIRTY | _PAGE_NX | _PAGE_ENC;
+		page_flags = _PAGE_PRESENT | _PAGE_ACCESSED | _PAGE_DIRTY | _PAGE_NX;
+		if (encrypt)
+			page_flags |= _PAGE_ENC;
 		pgdp = pgd_offset(current->active_mm, vaddr);
 		if (!pgdp || !pte_present(*(pte_t*)pgdp)) {
 			res = -EFAULT;
